@@ -1,4 +1,4 @@
-# CSC11006 Web Programming
+# CSC1106 Web Programming
 
 This private repository contains coursework, assignments, lab exercises, notes, and project files for my academic modules. It serves as a personal archive and reference throughout my academic journey.
 
