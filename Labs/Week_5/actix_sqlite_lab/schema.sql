@@ -1,0 +1,6 @@
+CREATE TABLE tasks (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	name TEXT NOT NULL,
+);
+
+ALTER TABLE tasks ADD description TEXT;

@@ -1,0 +1,11 @@
+[package]
+name = "template_engine"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+actix-web = "4"
+actix-session = { version = "0.7", features = ["cookie-session"] }
+tera = "1.19"
+bcrypt = "0.15"
+serde = { version = "1", features = ["derive"] }
