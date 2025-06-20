@@ -47,16 +47,10 @@ where
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
         println!("Request: {}", req.path());
-        let start_time = std::time::Instant::now(); // Start timer
 
         let fut = self.service.call(req);
         Box::pin(async move {
             let res = fut.await?;
-
-            // Log duration
-            let duration = start_time.elapsed();
-            println!("Response time: {:?}", duration);
-
             Ok(res)
         })
     }

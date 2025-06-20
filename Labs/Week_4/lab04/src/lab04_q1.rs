@@ -47,16 +47,10 @@ where
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
         println!("Request: {}", req.path());
-        let start_time = std::time::Instant::now(); // Start timer
 
         let fut = self.service.call(req);
         Box::pin(async move {
             let res = fut.await?;
-
-            // Log duration
-            let duration = start_time.elapsed();
-            println!("Response time: {:?}", duration);
-
             Ok(res)
         })
     }
@@ -73,14 +67,6 @@ struct AppState{
 async fn delayed_response() -> impl Responder{
     sleep(Duration::from_secs(2)).await;
     HttpResponse::Ok().body("Responded after delay.")
-}
-
-
-// Question 2
-async fn reset_counter(data: web::Data<AppState>) -> impl Responder{
-    let mut count = data.counter.lock().unwrap();
-    *count = 0;
-    format!("Counter reset to 0!")
 }
 
 
@@ -116,7 +102,6 @@ async fn main() -> std::io::Result<()> {
             .route("/name", web::get().to(get_app_name))
             .route("/inc", web::post().to(increment_counter))
             .route("/value", web::get().to(read_counter))
-            .route("/reset", web::get().to(reset_counter))  // Question 2
             .route("/delay", web::get().to(delayed_response))
     })
     .bind(("127.0.0.1", 8080))?
