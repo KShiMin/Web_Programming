@@ -20,29 +20,6 @@ struct Task {
     description: Option<String>,
 }
 
-// Question 2
-#[put("/tasks/{id}")]
-async fn update_task(
-    db_pool: web::Data<SqlitePool>,
-    path: web::Path<i64>,
-    form: web::Json<CreateTask>,
-) -> impl Responder {
-    let id = path.into_inner();
-
-    let result = sqlx::query("UPDATE tasks SET name = ? WHERE id = ?")
-        .bind(&form.name)
-        .bind(id)
-        .execute(db_pool.get_ref())
-        .await
-        .map_err(AppError::Database)?;
-
-    if result.rows_affected() == 0 {
-        Err(AppError::NotFound(format!("404 Not Found\n")))
-    } else {
-        Ok(HttpResponse::Ok().body(format!("Updated task {}", id)))
-    }
-}
-
 #[delete("/tasks/{id}")]
 async fn delete_task(
     db_pool: web::Data<SqlitePool>,
@@ -112,8 +89,6 @@ async fn get_tasks(db_pool: web::Data<SqlitePool>) -> Result<impl Responder, App
         .await
         .map_err(AppError::Database)?;
     
-    // Question 3
-    println!("Fetched {:?} tasks", tasks.len());
     Ok(HttpResponse::Ok().json(tasks))
 }
 
@@ -135,7 +110,6 @@ async fn main() -> std::io::Result<()> {
 	        .service(get_task_by_id)
             .service(create_task)
             .service(delete_task)
-            .service(update_task)	// Question 2
     })
     .bind(("127.0.0.1", 8080))?
     .run()

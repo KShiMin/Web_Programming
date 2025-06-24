@@ -111,9 +111,7 @@ async fn get_tasks(db_pool: web::Data<SqlitePool>) -> Result<impl Responder, App
         .fetch_all(db_pool.get_ref())
         .await
         .map_err(AppError::Database)?;
-    
-    // Question 3
-    println!("Fetched {:?} tasks", tasks.len());
+
     Ok(HttpResponse::Ok().json(tasks))
 }
 
