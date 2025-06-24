@@ -1,8 +1,11 @@
+mod error;
+
 use actix_web::{delete, get, post, put, web, App, HttpResponse, HttpServer, Responder};
 use dotenvy::dotenv;
 use serde::{Serialize, Deserialize};
 use sqlx::{FromRow, SqlitePool};
 use std::env;
+use error::AppError;
 
 #[derive(Deserialize)]
 struct CreateTask {
@@ -17,6 +20,7 @@ struct Task {
     description: Option<String>,
 }
 
+// Question 2
 #[put("/tasks/{id}")]
 async fn update_task(
     db_pool: web::Data<SqlitePool>,
@@ -90,6 +94,26 @@ async fn create_task(
     }
 }
 
+
+#[get("/tasks/{id}")]
+async fn get_task_by_id(
+	db_pool: web::Data<SqlitePool>,
+	path: web::Path<i64>,
+) -> Result<impl Responder, AppError> {
+	let id = path.into_inner();
+	let task = sqlx::query_as::<_, Task>("SELECT id, name FROM tasks WHERE id = ?")
+        .bind(id)
+        .fetch_optional(db_pool.get_ref())
+        .await
+        .map_err(AppError::Database)?;
+
+	match task {
+		Some(t) => Ok(HttpResponse::Ok().json(t)),
+		None => Err(AppError::NotFound(format!("Task with id {} not found", id))),
+	}
+}
+
+
 #[get("/tasks")]
 async fn get_tasks(db_pool: web::Data<SqlitePool>) -> impl Responder {
     let result = sqlx::query_as::<_,Task>("SELECT id, name, description FROM tasks")
@@ -97,6 +121,7 @@ async fn get_tasks(db_pool: web::Data<SqlitePool>) -> impl Responder {
         .await;
 
     match result {
+	// Question 3
         Ok(tasks) => {
             println!("Fetched {:?} tasks", tasks.len());
             HttpResponse::Ok().json(tasks)
@@ -123,9 +148,10 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(db_pool.clone()))
             .service(get_tasks)
+	    .service(get_task_by_id)
             .service(create_task)
             .service(delete_task)
-            .service(update_task)
+            .service(update_task)	// Question 2
     })
     .bind(("127.0.0.1", 8080))?
     .run()
