@@ -92,7 +92,7 @@ async fn get_task_by_id(
 	path: web::Path<i64>,
 ) -> Result<impl Responder, AppError> {
 	let id = path.into_inner();
-	let task = sqlx::query_as::<_, Task>("SELECT id, name FROM tasks WHERE id = ?")
+	let task = sqlx::query_as::<_, Task>("SELECT id, name, description FROM tasks WHERE id = ?")
         .bind(id)
         .fetch_optional(db_pool.get_ref())
         .await
@@ -107,7 +107,7 @@ async fn get_task_by_id(
 
 #[get("/tasks")]
 async fn get_tasks(db_pool: web::Data<SqlitePool>) -> Result<impl Responder, AppError> {
-    let tasks = sqlx::query_as::<_, Task>("SELECT id, name FROM tasks")
+    let tasks = sqlx::query_as::<_, Task>("SELECT id, name, description FROM tasks")
         .fetch_all(db_pool.get_ref())
         .await
         .map_err(AppError::Database)?;
