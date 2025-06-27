@@ -1,0 +1,36 @@
+curl -i -X POST http://127.0.0.1:8080/login \
+  -H "Content-Type: application/json" \
+  -d '{"id":"2447c16b-a56d-47c9-a4d7-bab5dde0d90e", "username":"admin", "hashed_password":"fake"}'
+
+
+TOKEN=$(curl -s -X POST http://127.0.0.1:8080/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin", "hashed_password":"fake"}' | jq -r '.token')
+
+
+curl -X POST http://127.0.0.1:8080/buy \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+        "user_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+        "stock_id": "cccccccc-cccc-cccc-cccc-cccccccccccc",
+        "quantity": 100,
+        "transaction_type": "buy"
+      }'
+
+
+curl -X POST http://127.0.0.1:8080/sell \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "id": "dddddddd-dddd-dddd-dddd-dddddddddddd",
+        "user_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+        "stock_id": "cccccccc-cccc-cccc-cccc-cccccccccccc",
+        "quantity": 50,
+        "transaction_type": "sell"
+      }'
+
+
+curl -X GET http://127.0.0.1:8080/transactions \
+  -H "Authorization: Bearer $TOKEN"
