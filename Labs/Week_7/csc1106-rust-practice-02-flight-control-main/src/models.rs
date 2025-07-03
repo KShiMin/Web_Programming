@@ -14,3 +14,13 @@ pub struct WeatherRequest {
     pub latitude: f64,
     pub longitude: f64,
 }
+
+// Aircraft & Pliot Models Missing
+#[derive(Serialize, Deserialize)]
+pub struct Aircraft {
+    aircraft_id: u32,
+    aircraft_name: String,
+    aircraft_model: String,
+    perfomance: String,
+    maintainence: Boolean, // need to change
+}

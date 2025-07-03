@@ -11,6 +11,7 @@ use handlers::*;
 async fn main() -> std::io::Result<()> {
     let conn = Connection::open_in_memory().unwrap();
     conn.execute(
+        // Creation of SQL tables
         "CREATE TABLE flight (
                   flight_id     INTEGER PRIMARY KEY,
                   pilot_id      INTEGER NOT NULL,
@@ -21,7 +22,7 @@ async fn main() -> std::io::Result<()> {
         [],
     ).unwrap();
 
-    // Wrap the connection in a Mutex
+    // Wrap the connection in a Mutex -- database content is changable 
     let data = web::Data::new(Mutex::new(conn));
 
     HttpServer::new(move || {

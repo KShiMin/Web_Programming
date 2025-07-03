@@ -57,7 +57,7 @@ pub async fn retrieve_weather(info: web::Query<WeatherRequest>) -> impl Responde
     // Logic for weather retrieval
     HttpResponse::Ok().json(format!(
         "Weather data for lat: {}, long: {}",
-        info.latitude, info.longitude
+        info.latitude, info.longitude       // retrieved from web?
     ))
 }
 
