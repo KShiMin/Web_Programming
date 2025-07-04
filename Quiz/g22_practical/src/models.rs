@@ -1,28 +1,31 @@
-use serde::{Deserialize, Seralize};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 // Enums for bug reports
+#[derive(serde::Serialize, serde::Deserialize)]
 pub enum Severity {
-    LOW, 
-    MEDIUM, 
-    HIGH,
+    Low, 
+    Medium, 
+    High,
 }
 
+#[derive(serde::Serialize, serde::Deserialize)]
 pub enum Status {
-    ACTIVE, 
-    TEST, 
-    VERIFIED, 
-    CLOSED, 
-    REOPENED,
+    Active, 
+    Test, 
+    Verified, 
+    Closed, 
+    Reopened,
 }
 
 // define different types of roles available in a company
+#[derive(serde::Serialize, serde::Deserialize)]
 pub enum UserRole {
     Admin,
     Developer
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize)]
 pub struct Bug {
     pub bug_id: Uuid,
     pub title: String,
@@ -43,29 +46,35 @@ pub struct NewProject{
 
 
 #[derive(Deserialize)]
-pub struct LoginRequest {
+pub struct LoginForm {
     pub username: String,
     pub password: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize)] 
+pub struct LoginQuery { 
+    pub error: Option<String>,
+    pub success: Option<String>, 
+} 
+
+#[derive(Serialize, Deserialize)]
 pub struct Project {
     pub project_id: Uuid,
     pub name: String,
     pub description: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize)]
 pub struct Team {
     pub team_id: Uuid,
     pub name: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize)]
 pub struct User {
     pub user_id: Uuid,
     pub username: String,
-    pub hashed_password: String,
+    pub password: String,
     pub email: String,
     pub role: UserRole,
     pub team_id: Uuid,  // link to Team struct to retrieve necessary info.
