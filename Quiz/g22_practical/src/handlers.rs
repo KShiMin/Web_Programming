@@ -1,10 +1,12 @@
 use actix_web::{web, HttpResponse, Responder};
-use actix_session::{Session, SessionMiddleware, storage::CookieSessionStore};
+use actix_session::{Session};
 use sqlx::SqlitePool;
 use uuid::Uuid;
 use bcrypt::{hash, verify, DEFAULT_COST};
 use serde_json::json;
 use tera::{Tera, Context};
+use std::sync::{Arc, Mutex};
+use crate::AppState;
 
 // mod models;
 // mod auth;
@@ -53,6 +55,7 @@ fn mock_user(username: &str) -> Option<User> {
 }
 
 
+// Error Display in html
 pub async fn login_form( 
     tmpl: web::Data<Tera>, 
     query: web::Query<LoginQuery>, 
@@ -68,6 +71,7 @@ pub async fn login_form(
     HttpResponse::Ok().body(s) 
 }
 
+// Login Process 
 pub async fn login_process(
     form: web::Form<LoginForm>,
     session: Session,
@@ -98,6 +102,7 @@ pub async fn login_process(
     })))
 }
 
+// Home Page Logic
 pub async fn home(session: Session) -> impl Responder {
     match session.get::<String>("username") {
         Ok(Some(username)) => HttpResponse::Ok().body(format!("Welcome, {}!", username)),
@@ -128,4 +133,38 @@ pub async fn login(req: web::Json<LoginForm>) -> impl Responder {
     }))
 }
 
+// Question 2 - CURL only
+pub type SharedProjectList = Arc<Mutex<Vec<Project>>>;
+
+pub async fn create_project(
+    session: Session,
+    data: web::Data<SharedProjectList>,
+    new_proj: web::Json<NewProject>,
+) -> impl Responder {
+    // Extract role from session
+    let role = session.get::<String>("role").unwrap_or(None);
+
+    if role.as_deref() != Some("Admin") {
+        return HttpResponse::Unauthorized().json(json!({
+            "Error": "Only admin users can create projects."
+        }));
+    }
+
+    let mut projects = data.lock().unwrap();
+    let project = Project {
+        project_id: Uuid::new_v4(),
+        name: new_proj.name.clone(),
+        description: new_proj.description.clone(),
+    };
+    projects.push(project);
+
+    HttpResponse::Ok().json(json!({
+        "Status": "Project added successfully"
+    }))
+}
+
+pub async fn get_projects(data: web::Data<SharedProjectList>) -> impl Responder {
+    let projects = data.lock().unwrap();
+    HttpResponse::Ok().json(&*projects)
+}
 
