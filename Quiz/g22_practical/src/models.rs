@@ -41,14 +41,6 @@ pub struct NewProject{
     pub description: String,
 }
 
-#[derive(Deserialize)]
-pub struct NewUser {
-    pub username: String,
-    pub password: String,
-    pub email: String,
-    pub role: String,      // e.g. "Admin" or "Developer"
-    pub team_id: Uuid,
-}
 
 #[derive(Deserialize)]
 pub struct LoginRequest {
