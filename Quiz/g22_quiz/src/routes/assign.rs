@@ -4,6 +4,7 @@ use actix_web::{get, post, web, HttpResponse, Responder};
 use tera::Context;
 use crate::state::AppState;
 use crate::models::AssignForm;
+use crate::routes::auth::mock_user;
 use sqlx::{query, Row};
 use crate::email::send_email;
 
@@ -70,18 +71,21 @@ pub async fn post_assign(
     ctx.insert("message", &format!("Assigned bug {} → dev {}", form.bug_id, form.developer_id));
 
     // Send notification to admin (or to the developer)
-    let admin = std::env::var("ADMIN_EMAIL").unwrap();
     let subject = format!("Bug #{} assigned", form.bug_id);
     let body = format!(
         "Bug #{} has been assigned to developer {}",
         form.bug_id, form.developer_id
     );
-    actix_web::rt::spawn(async move {
-        let _ = send_email(&admin, &subject, &body).await;
-    });
-} else {
-    ctx.insert("message", "Error: invalid bug ID");
-}
+
+    if let Some(admin_user) = mock_user("admin") {
+        let admin_email = admin_user.email.clone();
+        actix_web::rt::spawn(async move {
+            let _ = send_email(&admin_email, &subject, &body).await;
+        });
+    } 
+    } else {
+        ctx.insert("message", "Error: invalid bug ID");
+    }
 
     // 3b) Success → 200
     ctx.insert("message", &format!(

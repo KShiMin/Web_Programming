@@ -6,11 +6,14 @@
 
 		{% if role == "Admin"  %}
 			<p>Your Role is: {{ role }}</p>
-			<p>Button to create a project</p>
-
+			<a href="/projects">Create/View Projects</a><br>
 		{% elif role == "Developer"  %}
 			<p>Your Role is: {{ role }}</p>
-			<p>View all current bugst</p>
+			<a href="/bugs/view">View Bug List</a><br>
 		{% endif %}
+
+		  <!-- Always available -->
+		<a href="/bugs/assign">Assign a Bug</a><br>
+		<a href="/">Logout</a>
 	</body>
 </html>

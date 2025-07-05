@@ -53,10 +53,12 @@ async fn main() -> std::io::Result<()> {
 
                     // JSON endpoints
                     .service(routes::bugs::create_bug)   // POST /bugs/new
-                    .service(routes::bugs::list_bugs)    // GET  /bugs
+                    .service(routes::bugs::list_bugs)   // for curl if want use
+                    .service(routes::bugs::list_bugs_html)    // GET  /bugs
 
                     // Parameterized, last
-                    .service(routes::bugs::get_bug)      // GET    /bugs/{id}
+                    .service(routes::bugs::view_bug_html)      // GET    /bugs/{id}
+                    .service(routes::bugs::get_bug) // for curl if want use
                     .service(routes::bugs::update_bug)   // PATCH  /bugs/{id}
                     .service(routes::bugs::delete_bug)   // DELETE /bugs/{id}
             )
@@ -66,6 +68,7 @@ async fn main() -> std::io::Result<()> {
             .service(routes::projects::create_project)   // POST /projects
             .service(routes::auth::login_process)             // POST /login
             .service(routes::auth::login_form)             // GET /login
+            .service(routes::auth::logout) 
             .service(routes::auth::home)             // GET /home
             .service(routes::auth::login)               // POST /api/login for curl
     })

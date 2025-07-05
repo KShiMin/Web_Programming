@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Bug List</title>
+</head>
+<body>
+  <h1>All Bugs</h1>
+  <table border="1" cellpadding="5">
+    <tr>
+      <th>ID</th><th>Title</th><th>Status</th><th>Actions</th>
+    </tr>
+    {% for bug in bugs %}
+    <tr>
+      <td>{{ bug.bug_id }}</td>
+      <td>{{ bug.title }}</td>
+      <td>{{ bug.status }}</td>
+      <td>
+        <a href="/bugs/view/{{ bug.bug_id }}">View</a> |
+        <a href="/bugs/assign?bug_id={{ bug.bug_id }}">Assign</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p><a href="/home">← Back Home</a></p>
+</body>
+</html>

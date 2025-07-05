@@ -10,7 +10,7 @@ use uuid::Uuid;
 
 const SALT: &str = "bugtrack2025";
 
-fn mock_user(username: &str) -> Option<User> {
+pub fn mock_user(username: &str) -> Option<User> {
     match username {
         "admin" => {
             let plain = "adminpass";
@@ -44,7 +44,7 @@ fn mock_user(username: &str) -> Option<User> {
     }
 }
 
-#[get("/login")]
+#[get("/")]
 pub async fn login_form( 
     tmpl: web::Data<AppState>, 
     query: web::Query<LoginQuery>, 
@@ -60,7 +60,7 @@ pub async fn login_form(
     HttpResponse::Ok().body(s) 
 }
 
-#[post("/login")]
+#[post("/")]
 pub async fn login_process(
     form: web::Form<LoginForm>,
     session: Session,
@@ -81,7 +81,7 @@ pub async fn login_process(
         } else {
             println!("Status: Failure");
             return Ok(HttpResponse::Found()
-                .append_header(("Location", "/login?error=1"))
+                .append_header(("Location", "/?error=1"))
                 .finish()
             )
         };
@@ -90,6 +90,14 @@ pub async fn login_process(
     Ok(HttpResponse::Ok().json(json!({
         "Status": "failure"
     })))
+}
+
+#[get("/")]
+pub async fn logout(session: Session) -> impl Responder {
+    session.purge();
+    HttpResponse::Found()
+        .append_header(("Location", "/"))
+        .finish()
 }
 
 #[get("/home")]
@@ -111,7 +119,7 @@ pub async fn home(
             HttpResponse::Ok().body(home)
             // HttpResponse::Ok().body(format!("Welcome, {}!", username))
         }
-        _ => HttpResponse::Found().append_header(("Location", "/login")).finish(),
+        _ => HttpResponse::Found().append_header(("Location", "/home")).finish(),
     }
 }
 

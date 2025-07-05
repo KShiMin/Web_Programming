@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Bug Details</title>
+</head>
+<body>
+  <h1>Bug #{{ bug.bug_id }}</h1>
+  <p><strong>Title:</strong> {{ bug.title }}</p>
+  <p><strong>Description:</strong><br>{{ bug.description | safe }}</p>
+  <p><strong>Reported by:</strong> {{ bug.reported_by }}</p>
+  <p><strong>Severity:</strong> {{ bug.severity }}</p>
+  <p><strong>Status:</strong> {{ bug.status }}</p>
+  {% if bug.developer_id %}
+    <p><strong>Assigned to:</strong> Developer {{ bug.developer_id }}</p>
+  {% endif %}
+  {% if bug.project %}
+    <p><strong>Project:</strong> {{ bug.project }}</p>
+  {% endif %}
+
+  <p>
+    <a href="/bugs/view">← Back to List</a>
+  </p>
+</body>
+</html>

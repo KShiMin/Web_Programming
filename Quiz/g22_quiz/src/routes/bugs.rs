@@ -3,6 +3,8 @@ use sqlx::Row;
 use crate::models::{Bug, NewBug, BugQuery, PatchBug};
 use crate::state::AppState;
 use crate::email::send_email;
+use crate::routes::auth::mock_user;
+use tera::Context;
 
 // 1) Create new bug: POST /bugs/new
 #[post("/new")]
@@ -31,15 +33,21 @@ pub async fn create_bug(
         .fetch_one(&state.pool).await.unwrap();
 
     // Spawn the email task *before* returning
-    let admin = std::env::var("ADMIN_EMAIL").unwrap();
     let subject = format!("New bug #{} reported", bug.bug_id);
     let body = format!(
         "Title: {}\nReporter: {}\nSeverity: {}\n\n{}",
         bug.title, bug.reported_by, bug.severity, bug.description
     );
-    actix_web::rt::spawn(async move {
-        let _ = send_email(&admin, &subject, &body).await;
-    });
+
+    if let Some(admin_user) = mock_user("admin") {
+        let admin_email = admin_user.email.clone();
+        actix_web::rt::spawn(async move {
+            let _ = send_email(&admin_email, &subject, &body).await;
+        });
+    } else {
+        // fallback or just skip sending
+        println!("No admin user found in mock store, skipping email");
+    }
 
     // Now return the response
     HttpResponse::Created().json(bug)
@@ -71,6 +79,24 @@ pub async fn list_bugs(
     HttpResponse::Ok().json(bugs)
 }
 
+#[get("/view")]
+pub async fn list_bugs_html(
+    state: web::Data<AppState>
+) -> impl Responder {
+    let bugs = sqlx::query_as::<_, Bug>("SELECT * FROM bugs")
+        .fetch_all(&state.pool)
+        .await
+        .unwrap();
+
+    let mut ctx = Context::new();
+    ctx.insert("bugs", &bugs);
+
+    let body = state.tera.render("bugs_list.html", &ctx).unwrap();
+    HttpResponse::Ok()
+        .content_type("text/html; charset=utf-8")
+        .body(body)
+}
+
 // 3) Get a bug by id: GET /bugs/{id}
 #[get("/{id}")]
 pub async fn get_bug(
@@ -83,6 +109,33 @@ pub async fn get_bug(
     {
         Some(b) => HttpResponse::Ok().json(b),
         None    => HttpResponse::NotFound().body("Bug not found"),
+    }
+}
+
+// View one bug’s details
+#[get("/view/{id}")]
+pub async fn view_bug_html(
+    state: web::Data<AppState>,
+    path: web::Path<String>,
+) -> impl Responder {
+    let id = path.into_inner();
+    match sqlx::query_as::<_, Bug>(
+            "SELECT * FROM bugs WHERE bug_id = ?"
+        )
+        .bind(id.clone())
+        .fetch_optional(&state.pool)
+        .await
+        .unwrap()
+    {
+        Some(bug) => {
+            let mut ctx = Context::new();
+            ctx.insert("bug", &bug);
+            let body = state.tera.render("bug_detail.html", &ctx).unwrap();
+            HttpResponse::Ok()
+                .content_type("text/html; charset=utf-8")
+                .body(body)
+        }
+        None => HttpResponse::NotFound().body("Bug not found"),
     }
 }
 
