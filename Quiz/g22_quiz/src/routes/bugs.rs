@@ -1,8 +1,8 @@
 use actix_web::{post, get, patch, delete, web, HttpResponse, Responder};
 use sqlx::Row;
 use crate::models::{Bug, NewBug, BugQuery, PatchBug};
-use crate::AppState;
-// use crate::email::send_email;
+use crate::state::AppState;
+use crate::email::send_email;
 
 // 1) Create new bug: POST /bugs/new
 #[post("/new")]
@@ -37,9 +37,9 @@ pub async fn create_bug(
         "Title: {}\nReporter: {}\nSeverity: {}\n\n{}",
         bug.title, bug.reported_by, bug.severity, bug.description
     );
-    // actix_web::rt::spawn(async move {
-    //     let _ = send_email(&admin, &subject, &body).await;
-    // });
+    actix_web::rt::spawn(async move {
+        let _ = send_email(&admin, &subject, &body).await;
+    });
 
     // Now return the response
     HttpResponse::Created().json(bug)

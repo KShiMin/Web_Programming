@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+	<head><title>Home</title></head>
+	<body>
+		<h1>Welcome {{ username }}</h1>
+
+		{% if role == "Admin"  %}
+			<p>Your Role is: {{ role }}</p>
+			<p>Button to create a project</p>
+
+		{% elif role == "Developer"  %}
+			<p>Your Role is: {{ role }}</p>
+			<p>View all current bugst</p>
+		{% endif %}
+	</body>
+</html>

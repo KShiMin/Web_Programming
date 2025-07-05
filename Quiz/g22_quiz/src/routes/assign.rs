@@ -2,22 +2,25 @@
 
 use actix_web::{get, post, web, HttpResponse, Responder};
 use tera::Context;
-use crate::AppState;
+use crate::state::AppState;
 use crate::models::AssignForm;
-use sqlx::query;
-use uuid::Uuid;
-// use crate::email::send_email;
+use sqlx::{query, Row};
+use crate::email::send_email;
 
 // GET /bugs/assign → renders the form
 #[get("/assign")]
 pub async fn assign_form(state: web::Data<AppState>) -> impl Responder {
     let devs = vec![1, 2, 3];
-    let rows = query!("SELECT bug_id, title FROM bugs")
+    let rows = query("SELECT bug_id, title FROM bugs")
         .fetch_all(&state.pool).await.unwrap();
 
     let bugs: Vec<(i64, String)> = rows
         .into_iter()
-        .map(|r| (r.bug_id, r.title))
+        .map(|r| {
+            let id: i64      = r.get("bug_id");
+            let title: String = r.get("title");
+            (id, title)
+        })
         .collect();
 
     let mut ctx = Context::new();
@@ -34,29 +37,7 @@ pub async fn post_assign(
     state: web::Data<AppState>,
     form: web::Form<AssignForm>,
 ) -> impl Responder {
-    // let valid_devs: Vec<Uuid>
-    // let valid_devs = vec![1, 2, 3];
-    let rows = sqlx::query!(
-        // we tell SQLx “the `user_id` column maps to a `Uuid`”
-        r#"
-        SELECT user_id as "user_id: Uuid"
-        FROM users
-        WHERE role = ?
-        "#,
-        UserRole::Developer as _
-    )
-    .fetch_all(pool)
-    .await
-    .map_err(|e| {
-        eprintln!("DB error: {}", e);
-        HttpResponse::InternalServerError().finish()
-    })?;
-
-    // now collect into a Vec<Uuid>
-    let valid_devs: Vec<Uuid> = rows.into_iter()
-        .map(|r| r.user_id)
-        .collect();
-
+    let valid_devs = vec![1, 2, 3];
     let mut ctx = Context::new();
 
     // 1) Validate developer_id → 400
@@ -69,11 +50,11 @@ pub async fn post_assign(
     }
 
     // 2) Attempt the UPDATE
-    let res = query!(
-        "UPDATE bugs SET developer_id = ? WHERE bug_id = ?",
-        form.developer_id,
-        form.bug_id
+    let res = query(
+        "UPDATE bugs SET developer_id = ? WHERE bug_id = ?"
     )
+    .bind(form.developer_id)
+    .bind(form.bug_id)
     .execute(&state.pool).await.unwrap();
 
     // 3a) If no rows affected → invalid bug → 404
@@ -95,9 +76,9 @@ pub async fn post_assign(
         "Bug #{} has been assigned to developer {}",
         form.bug_id, form.developer_id
     );
-    // actix_web::rt::spawn(async move {
-    //     let _ = send_email(&admin, &subject, &body).await;
-    // });
+    actix_web::rt::spawn(async move {
+        let _ = send_email(&admin, &subject, &body).await;
+    });
 } else {
     ctx.insert("message", "Error: invalid bug ID");
 }
