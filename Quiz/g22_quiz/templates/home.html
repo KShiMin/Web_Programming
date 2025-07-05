@@ -6,7 +6,13 @@
 
 		{% if role == "Admin"  %}
 			<p>Your Role is: {{ role }}</p>
-			<a href="/projects">Create/View Projects</a><br>
+			<a href="/projects/new">
+				<button>Create Project</button>
+			</a>
+			<a href="/projects/view">
+				<button>View Projects</button>
+			</a>
+
 		{% elif role == "Developer"  %}
 			<p>Your Role is: {{ role }}</p>
 			<a href="/bugs/view">View Bug List</a><br>
@@ -14,6 +20,6 @@
 
 		  <!-- Always available -->
 		<a href="/bugs/assign">Assign a Bug</a><br>
-		<a href="/">Logout</a>
+		<a href="/login">Logout</a>
 	</body>
 </html>

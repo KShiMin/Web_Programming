@@ -52,7 +52,7 @@ pub struct LoginQuery {
 } 
 
 // PROJECT models
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Project {
     pub project_id: Uuid,
     pub name: String,

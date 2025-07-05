@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>All Projects</title>
+  </head>
+  <body>
+    <h1>Projects</h1>
+
+    {% if projects | length > 0 %}
+      <ul>
+        {% for p in projects %}
+          <li>
+            <strong>{{ p.name }}</strong><br/>
+            {{ p.description | default(value="(no description)") }}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No projects yet.</p>
+    {% endif %}
+    <a href="/home">Back to Home</a>
+  </body>
+</html>

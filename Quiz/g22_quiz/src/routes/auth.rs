@@ -44,7 +44,7 @@ pub fn mock_user(username: &str) -> Option<User> {
     }
 }
 
-#[get("/")]
+#[get("/login")]
 pub async fn login_form( 
     tmpl: web::Data<AppState>, 
     query: web::Query<LoginQuery>, 
@@ -60,7 +60,7 @@ pub async fn login_form(
     HttpResponse::Ok().body(s) 
 }
 
-#[post("/")]
+#[post("/login")]
 pub async fn login_process(
     form: web::Form<LoginForm>,
     session: Session,
@@ -92,7 +92,7 @@ pub async fn login_process(
     })))
 }
 
-#[get("/")]
+#[get("/logout")]
 pub async fn logout(session: Session) -> impl Responder {
     session.purge();
     HttpResponse::Found()

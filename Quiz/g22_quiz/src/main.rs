@@ -66,6 +66,10 @@ async fn main() -> std::io::Result<()> {
             // Other top-level routes
             .service(routes::projects::get_projects)  // GET  /projects
             .service(routes::projects::create_project)   // POST /projects
+            .service(routes::projects::create_project_form)
+            .service(routes::projects::new_project_form)
+            .service(routes::projects::get_projects_api)
+            .service(routes::projects::get_projects_html)
             .service(routes::auth::login_process)             // POST /login
             .service(routes::auth::login_form)             // GET /login
             .service(routes::auth::logout) 
