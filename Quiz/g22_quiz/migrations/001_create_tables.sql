@@ -8,9 +8,3 @@ CREATE TABLE IF NOT EXISTS bugs (
   project      TEXT,
   developer_id INTEGER
 );
-
-CREATE TABLE IF NOT EXISTS users (
-  user_id  INTEGER PRIMARY KEY,
-  username TEXT    UNIQUE NOT NULL,
-  hash     TEXT    NOT NULL
-);
